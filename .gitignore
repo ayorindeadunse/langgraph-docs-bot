@@ -1,0 +1,90 @@
+## .NET build
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]og/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio Code
+.vscode/
+*.code-workspace
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## ASP.NET & Blazor
+wwwroot/dist/
+wwwroot/node_modules/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## Dependency manager
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## User settings
+*.swp
+*.DS_Store
+*.sdf
+*.dbmdl
+*.bak
+*.orig
+*.userprefs
+*.rsuser
+*.psess
+*.vspx
+*.vsp
+*.pdb
+*.cache
+*.vspscc
+*.vssscc
+*.publish.xml
+*.PublishProfiles/
+
+## IIS / ASP.NET
+*.db
+*.mdf
+*.ldf
+*.pidb
+*.suo
+*.sln.docstates
+
+## Logs
+*.log
+
+## Docker
+docker-compose.override.yml
+docker-compose.*
+Dockerfile.*
+
+## Environment / secrets
+.env
+.env.*
+
+## Temporary files
+*.tmp
+*.temp
+*.~*
+~$*
+
+## Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Rider
+.idea/
+.idea_modules/
