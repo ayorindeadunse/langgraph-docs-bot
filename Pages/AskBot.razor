@@ -1,18 +1,24 @@
 @page "/ask"
 @using LangGraphDocsBot.Models
-@inject HttpClient http
+@inject IHttpClientFactory HttpClientFactory
 
-<h3>Ask LangGraphDocsBot</h3>
+<div class="container mt-4" style="max-width: 800px;">
+    <h3 class="mb-3">Ask LangCraphDocsBot</h3>
 
 <div class="mb-3">
     <input class="form-control" @bind="question" placeholder="Enter your question..." />
 </div>
 
-<button class="btn btn-primary" @onclick="SubmitQuestion">Ask</button>
+<button class="btn btn-primary mb-3" @onclick="SubmitQuestion">Ask</button>
 
 @if (isLoading)
 {
-    <p>Loading Answer...</p>
+   <div class="d-flex justify-content-center mt-3">
+    <div class="d-flex align-items-center">
+    <strong>Loading...</strong>
+    <div class="spinner-border ms-2 text-primary" role="status" aria-hidden="true"></div>
+   </div>
+   </div>
 }
 else if (response?.Sources != null && response.Sources.Count > 0)
 {
@@ -25,7 +31,7 @@ else if (response?.Sources != null && response.Sources.Count > 0)
         }
     </ul>
 }
-
+</div>
 @code {
     private string question = "";
     private QaResponse? response;
@@ -39,7 +45,8 @@ else if (response?.Sources != null && response.Sources.Count > 0)
         try
         {
             var request = new QuestionRequest { Question = question };
-            var result = await http.PostAsJsonAsync("http://localhost:8000/ask", request);
+            var client = HttpClientFactory.CreateClient("LangGraphDocsBotAPI");
+            var result = await client.PostAsJsonAsync("/ask",request);
 
             if (result.IsSuccessStatusCode)
             {
