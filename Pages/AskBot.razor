@@ -1,5 +1,62 @@
-﻿<h3>AskBot</h3>
+@page "/ask"
+@using LangGraphDocsBot.Models
+@inject HttpClient http
+
+<h3>Ask LangGraphDocsBot</h3>
+
+<div class="mb-3">
+    <input class="form-control" @bind="question" placeholder="Enter your question..." />
+</div>
+
+<button class="btn btn-primary" @onclick="SubmitQuestion">Ask</button>
+
+@if (isLoading)
+{
+    <p>Loading Answer...</p>
+}
+else if (response?.Sources != null && response.Sources.Count > 0)
+{
+    <ul>
+        @foreach (var source in response.Sources)
+        {
+            <li>
+                <a href="@source.Source" target="_blank">@(source.Title)</a> - @(source.Description)
+            </li>
+        }
+    </ul>
+}
 
 @code {
+    private string question = "";
+    private QaResponse? response;
+    private bool isLoading = false;
 
+    private async Task SubmitQuestion()
+    {
+        isLoading = true;
+        response = null;
+
+        try
+        {
+            var request = new QuestionRequest { Question = question };
+            var result = await http.PostAsJsonAsync("http://localhost:8000/ask", request);
+
+            if (result.IsSuccessStatusCode)
+            {
+                response = await result.Content.ReadFromJsonAsync<QaResponse>();
+            }
+            else
+            {
+                Console.WriteLine("Error: " + result.StatusCode);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception: " + ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }
