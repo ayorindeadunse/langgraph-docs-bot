@@ -9,7 +9,7 @@
     <input class="form-control" @bind="question" placeholder="Enter your question..." />
 </div>
 
-<button class="btn btn-primary mb-3" @onclick="SubmitQuestion">Ask</button>
+<button class="btn btn-primary mb-3" @onclick="SubmitQuestion" disabled="@string.IsNullOrWhiteSpace(question)">Ask</button>
 
 @if (isLoading)
 {
