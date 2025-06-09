@@ -1,46 +1,59 @@
 @page "/ask"
 @using LangGraphDocsBot.Models
 @inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JS
 
 <div class="container mt-4" style="max-width: 800px;">
-    <h3 class="mb-3">Ask LangCraphDocsBot</h3>
+    <h3 class="mb-4">Ask LangCraphDocsBot</h3>
 
-<div class="mb-3">
-    <input class="form-control" @bind="question" placeholder="Enter your question..." />
-</div>
-
-<button class="btn btn-primary mb-3" @onclick="SubmitQuestion" disabled="@string.IsNullOrWhiteSpace(question)">Ask</button>
-
-@if (isLoading)
-{
-   <div class="d-flex justify-content-center mt-3">
-    <div class="d-flex align-items-center">
-    <strong>Loading...</strong>
-    <div class="spinner-border ms-2 text-primary" role="status" aria-hidden="true"></div>
-   </div>
-   </div>
-}
-else if (response?.Sources != null && response.Sources.Count > 0)
-{
-    <ul>
-        @foreach (var source in response.Sources)
+    <div class="chat-box border p-3 rounded bg-light mb-3">
+        @if (!string.IsNullOrWhiteSpace(userQuestion))
         {
-            <li>
-                <a href="@source.Source" target="_blank">@(source.Title)</a> - @(source.Description)
-            </li>
+            <div class="d-flex justify-content-end mb-2">
+                <div class="p-2 bg-primary text-white rounded" style="max-width: 75%;">
+                    @userQuestion
+                </div>
+            </div>
+            }
+
+
+   @if (isLoading)
+        {
+            <div class="d-flex align-items-center mb-2">
+                <span class="spinner-border spinner-border-sm me-2 text-primary" role="status"></span>
+                <em>LangGraphDocsBot is typing...</em>
+            </div>
         }
-    </ul>
-}
+       @if (!string.IsNullOrWhiteSpace(answer))
+        {
+            <div class="d-flex justify-content-start mb-2">
+                <div class="p-2 bg-white border rounded shadow-sm" style="max-width: 75%;">
+                    @((MarkupString)Markdig.Markdown.ToHtml(answer))
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="input-group">
+        <input class="form-control" @bind="question" @bind:event="oninput" placeholder="Ask a question..." />
+        <button class="btn btn-primary" @onclick="SubmitQuestion" disabled="@string.IsNullOrWhiteSpace(question)">Ask</button>
+    </div>
 </div>
+
 @code {
     private string question = "";
-    private QaResponse? response;
+    private string userQuestion = "";
+    private string answer = "";
     private bool isLoading = false;
 
     private async Task SubmitQuestion()
     {
-        isLoading = true;
-        response = null;
+          if (string.IsNullOrWhiteSpace(question)) return;
+
+            userQuestion = question;
+            question = string.Empty;
+            answer = string.Empty;
+            isLoading = true;
 
         try
         {
@@ -50,15 +63,18 @@ else if (response?.Sources != null && response.Sources.Count > 0)
 
             if (result.IsSuccessStatusCode)
             {
-                response = await result.Content.ReadFromJsonAsync<QaResponse>();
+                var response  = await result.Content.ReadFromJsonAsync<QaResponse>();
+                    answer = response?.Response ?? "No response received.";
             }
             else
             {
+                answer = $"Error: {result.StatusCode}";
                 Console.WriteLine("Error: " + result.StatusCode);
             }
         }
         catch (Exception ex)
         {
+            answer = $" Exception: {ex.Message}";
             Console.WriteLine("Exception: " + ex.Message);
         }
         finally
