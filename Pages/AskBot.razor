@@ -6,33 +6,36 @@
 <div class="container mt-4" style="max-width: 800px;">
     <h3 class="mb-4">Ask LangGraphDocsBot</h3>
 
-    <div class="chat-box border p-3 rounded bg-light mb-3">
-        @if (!string.IsNullOrWhiteSpace(userQuestion))
-        {
-            <div class="d-flex justify-content-end mb-2">
-                <div class="p-2 bg-primary text-white rounded" style="max-width: 75%;">
-                    @userQuestion
+    @if (!string.IsNullOrWhiteSpace(userQuestion) || isLoading || !string.IsNullOrWhiteSpace(answer))
+    {
+        <div class="chat-box border p-3 rounded bg-light mb-3">
+            @if (!string.IsNullOrWhiteSpace(userQuestion))
+            {
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="p-2 bg-primary text-white rounded" style="max-width: 75%;">
+                        @userQuestion
+                    </div>
                 </div>
-            </div>
             }
 
-
-   @if (isLoading)
-        {
-            <div class="d-flex align-items-center mb-2">
-                <span class="spinner-border spinner-border-sm me-2 text-primary" role="status"></span>
-                <em>LangGraphDocsBot is typing...</em>
-            </div>
-        }
-       @if (!string.IsNullOrWhiteSpace(answer))
-        {
-            <div class="d-flex justify-content-start mb-2">
-                <div class="p-2 bg-white border rounded shadow-sm" style="max-width: 75%;">
-                    @((MarkupString)Markdig.Markdown.ToHtml(answer))
+            @if (isLoading)
+            {
+                <div class="d-flex align-items-center mb-2">
+                    <span class="spinner-border spinner-border-sm me-2 text-primary" role="status"></span>
+                    <em>LangGraphDocsBot is typing...</em>
                 </div>
-            </div>
-        }
-    </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(answer))
+            {
+                <div class="d-flex justify-content-start mb-2">
+                    <div class="p-2 bg-white border rounded shadow-sm" style="max-width: 75%;">
+                        @((MarkupString)Markdig.Markdown.ToHtml(answer))
+                    </div>
+                </div>
+            }
+        </div>
+    }
 
     <div class="input-group">
         <input class="form-control" @bind="question" @bind:event="oninput" placeholder="Ask a question..." />
@@ -48,24 +51,24 @@
 
     private async Task SubmitQuestion()
     {
-          if (string.IsNullOrWhiteSpace(question)) return;
+        if (string.IsNullOrWhiteSpace(question)) return;
 
-           var thisQuestion = question;
-           userQuestion = thisQuestion;
-           question = string.Empty;
-           answer = string.Empty;
-           isLoading = true;
+        var thisQuestion = question;
+        userQuestion = thisQuestion;
+        question = string.Empty;
+        answer = string.Empty;
+        isLoading = true;
 
         try
         {
             var request = new QuestionRequest { Question = thisQuestion };
             var client = HttpClientFactory.CreateClient("LangGraphDocsBotAPI");
-            var result = await client.PostAsJsonAsync("/ask",request);
+            var result = await client.PostAsJsonAsync("/ask", request);
 
             if (result.IsSuccessStatusCode)
             {
-                var response  = await result.Content.ReadFromJsonAsync<QaResponse>();
-                    answer = response?.Response ?? "No response received.";
+                var response = await result.Content.ReadFromJsonAsync<QaResponse>();
+                answer = response?.Response ?? "No response received.";
             }
             else
             {
@@ -75,7 +78,7 @@
         }
         catch (Exception ex)
         {
-            answer = $" Exception: {ex.Message}";
+            answer = $"Exception: {ex.Message}";
             Console.WriteLine("Exception: " + ex.Message);
         }
         finally
