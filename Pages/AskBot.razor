@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 
 <div class="container mt-4" style="max-width: 800px;">
-    <h3 class="mb-4">Ask LangCraphDocsBot</h3>
+    <h3 class="mb-4">Ask LangGraphDocsBot</h3>
 
     <div class="chat-box border p-3 rounded bg-light mb-3">
         @if (!string.IsNullOrWhiteSpace(userQuestion))
@@ -50,14 +50,15 @@
     {
           if (string.IsNullOrWhiteSpace(question)) return;
 
-            userQuestion = question;
-            question = string.Empty;
-            answer = string.Empty;
-            isLoading = true;
+           var thisQuestion = question;
+           userQuestion = thisQuestion;
+           question = string.Empty;
+           answer = string.Empty;
+           isLoading = true;
 
         try
         {
-            var request = new QuestionRequest { Question = question };
+            var request = new QuestionRequest { Question = thisQuestion };
             var client = HttpClientFactory.CreateClient("LangGraphDocsBotAPI");
             var result = await client.PostAsJsonAsync("/ask",request);
 
