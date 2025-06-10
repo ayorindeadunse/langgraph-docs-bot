@@ -48,7 +48,22 @@
     private string userQuestion = "";
     private string answer = "";
     private bool isLoading = false;
+    private string? sessionId;
 
+    protected override async Task OnInitializedAsync()
+    {
+        sessionId = await GetOrCreateSessionId();
+    }
+
+    private async Task<string> GetOrCreateSessionId()
+    {
+        var existing = await JS.InvokeAsync<string>("localStorage.getItem","chatSessionId");
+        if (!string.IsNullOrWhiteSpace(existing)) return existing;
+
+        var newSessionId = Guid.NewGuid().ToString();
+        await JS.InvokeVoidAsync("localStorage.setItem", "chatSessionId", newSessionId);
+        return newSessionId;
+    }
     private async Task SubmitQuestion()
     {
         if (string.IsNullOrWhiteSpace(question)) return;
@@ -63,7 +78,10 @@
         {
             var request = new QuestionRequest { Question = thisQuestion };
             var client = HttpClientFactory.CreateClient("LangGraphDocsBotAPI");
-            var result = await client.PostAsJsonAsync("/ask", request);
+
+            // Send  session_id as query string
+            var url = $"/ask?session_id={sessionId}";
+            var result = await client.PostAsJsonAsync(url, request);
 
             if (result.IsSuccessStatusCode)
             {
