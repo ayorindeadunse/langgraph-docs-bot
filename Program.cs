@@ -10,6 +10,7 @@ builder.Services.AddHttpClient("LangGraphDocsBotAPI", client =>
 {
     var config = builder.Configuration;
     client.BaseAddress = new Uri(config["LangGraphBotApi:BaseUrl"]);
+    client.Timeout = TimeSpan.FromSeconds(300);
 });
 
 var app = builder.Build();

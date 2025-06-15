@@ -54,6 +54,15 @@
     {
         sessionId = await GetOrCreateSessionId();
     }
+    // Initialize session Id After rendering to avoid prerender JS interop issues 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            sessionId = await GetOrCreateSessionId();
+            StateHasChanged(); // Refresh component once session ID is available
+        }
+    }
 
     private async Task<string> GetOrCreateSessionId()
     {
@@ -66,7 +75,7 @@
     }
     private async Task SubmitQuestion()
     {
-        if (string.IsNullOrWhiteSpace(question)) return;
+        if (string.IsNullOrWhiteSpace(question) || string.IsNullOrWhiteSpace(sessionId)) return;
 
         var thisQuestion = question;
         userQuestion = thisQuestion;
@@ -90,14 +99,15 @@
             }
             else
             {
-                answer = $"Error: {result.StatusCode}";
+                var errorText = await result.Content.ReadAsStringAsync();
+                answer = $"Error: {result.StatusCode}\n{errorText}";
                 Console.WriteLine("Error: " + result.StatusCode);
             }
         }
         catch (Exception ex)
         {
             answer = $"Exception: {ex.Message}";
-            Console.WriteLine("Exception: " + ex.Message);
+            Console.WriteLine("Exception: " + ex);
         }
         finally
         {
