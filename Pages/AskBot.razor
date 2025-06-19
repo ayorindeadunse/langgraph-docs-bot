@@ -33,15 +33,13 @@
         </div>
     }
     <div class="input-group">
-        <input class="form-control" @bind="question" @bind:event="oninput" placeholder="Ask a question..." />
+        <input class="form-control" @bind="question" @bind:event="oninput" disabled="@isLoading" placeholder="Ask a question..." />
         <button class="btn btn-primary" @onclick="SubmitQuestion" disabled="@string.IsNullOrWhiteSpace(question)">Ask</button>
     </div>
 </div>
 
 @code {
     private string question = "";
-   // private string userQuestion = "";
-   // private string answer = "";
     private bool isLoading = false;
     private string? sessionId;
 
@@ -76,9 +74,7 @@
         if (string.IsNullOrWhiteSpace(question) || string.IsNullOrWhiteSpace(sessionId)) return;
 
         var thisQuestion = question;
-       // userQuestion = thisQuestion;
         question = string.Empty;
-       // answer = string.Empty;
         isLoading = true;
 
         try
@@ -102,14 +98,11 @@
             {
                 var errorText = await result.Content.ReadAsStringAsync();
                 chatHistory.Add((thisQuestion, $"Error: {result.StatusCode}\n{errorText}"));
-                //answer = $"Error: {result.StatusCode}\n{errorText}";
-                //Console.WriteLine("Error: " + result.StatusCode);
             }
         }
         catch (Exception ex)
         {
             chatHistory.Add((thisQuestion, $"Exception: {ex.Message}"));
-           // answer = $"Exception: {ex.Message}";
             Console.WriteLine("Exception: " + ex);
         }
         finally
